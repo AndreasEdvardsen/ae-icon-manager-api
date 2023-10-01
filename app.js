@@ -10,18 +10,26 @@ const client = new MongoClient(uri);
 app.get("/icons", (req, res) => {
   const prefix = req.query.prefix;
   if (prefix) {
-    getIconsByPrefix(prefix).then((icons) => {
-      res.send(icons);
-    });
+    getIconsByPrefix(prefix)
+      .then((icons) => {
+        res.send(icons);
+      })
+      .catch((err) => {
+        res.status(500).send(err);
+      });
   } else {
     res.status(400).send("Missing prefix query parameter");
   }
 });
 
 app.get("/distinctIconPrefixes", (req, res) => {
-  getDistinctIconPrefixes().then((prefixes) => {
-    res.send(prefixes);
-  });
+  getDistinctIconPrefixes()
+    .then((prefixes) => {
+      res.send(prefixes);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
 });
 
 app.listen(port, () => {
