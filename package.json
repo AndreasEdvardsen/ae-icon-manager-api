@@ -18,6 +18,6 @@
   "homepage": "https://github.com/AndreasEdvardsen/ae-icon-manager-api#readme",
   "dependencies": {
     "express": "^4.18.2",
-    "realm-web": "^2.0.0"
+    "mongodb": "^6.1.0"
   }
 }
