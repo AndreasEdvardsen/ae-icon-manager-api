@@ -34,6 +34,7 @@ app.get("/distinctIconPrefixes", (req, res) => {
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
+  console.log(`MONGODB_URI: ${uri}`);
 });
 
 async function getDistinctIconPrefixes() {
