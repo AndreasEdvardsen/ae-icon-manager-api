@@ -1,35 +1,44 @@
-const express = require("express");
-const app = express();
-const port = process.env.PORT || 4000;
-
+require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
-const uri = process.env.MONGODB_URI;
+const express = require("express");
+const cors = require("cors");
+const app = express();
 
+const port = process.env.PORT || 4000;
+const uri = process.env.MONGODB_URI;
+const isProduction = process.env.NODE_ENV === "production";
 const client = new MongoClient(uri);
 
-app.get("/icons", (req, res) => {
+if (!isProduction) {
+  app.use(cors());
+}
+
+app.get("/icons", async (req, res) => {
   const prefix = req.query.prefix;
-  if (prefix) {
-    getIconsByPrefix(prefix)
-      .then((icons) => {
-        res.send(icons);
-      })
-      .catch((err) => {
-        res.status(500).send(err);
-      });
-  } else {
-    res.status(400).send("Missing prefix query parameter");
+  if (!prefix) {
+    return res.status(400).send("Missing prefix query parameter");
+  }
+
+  try {
+    const icons = await getIconsByPrefix(prefix);
+    res.send(icons);
+  } catch (err) {
+    res.status(500).send(err);
   }
 });
 
-app.get("/distinctIconPrefixes", (req, res) => {
-  getDistinctIconPrefixes()
-    .then((prefixes) => {
-      res.send(prefixes);
-    })
-    .catch((err) => {
-      res.status(500).send(err);
-    });
+app.get("/distinctIconPrefixes", async (req, res) => {
+  try {
+    const prefixes = await getDistinctIconPrefixes();
+    res.send(prefixes);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send("Something went wrong!");
 });
 
 app.listen(port, () => {
@@ -44,14 +53,10 @@ async function getDistinctIconPrefixes() {
 
 async function getIconsByPrefix(prefix) {
   const iconsCollection = client.db("AEIconManager").collection("Icons");
-  var icons = await iconsCollection.find({ prefix: prefix });
+  var icons = iconsCollection.find({ prefix: prefix });
 
   var manipulatedIcons = [];
   for await (const icon of icons) {
-    var image = encodeURIComponent(
-      icon.image.replace("<path ", `<path style="fill:#FFFFFF" `)
-    );
-    icon.imagePath = `data:image/svg+xml,${image}`;
     manipulatedIcons.push(icon);
   }
   return manipulatedIcons;
