@@ -16,6 +16,11 @@ const client = new MongoClient(uri);
 if (!isProduction) {
   app.use(cors());
 }
+else {
+  app.use(cors({
+    origin: process.env.CORS_ORIGIN || ""
+  }));
+}
 
 app.get("/icons", async (req, res) => {
   const prefix = req.query.prefix;
