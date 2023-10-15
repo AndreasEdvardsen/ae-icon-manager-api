@@ -70,28 +70,28 @@ async function getIconsByPrefix(prefix) {
   for await (const icon of icons) {
     manipulatedIcons.push(icon);
   }
-  updateNewDB(manipulatedIcons);
+  //updateNewDB(manipulatedIcons);
   return manipulatedIcons;
 }
 
-async function updateNewDB(icons) {
-  if (!icons || icons.length === 0) return;
+// async function updateNewDB(icons) {
+//   if (!icons || icons.length === 0) return;
 
-  const pb = new PocketBase("https://pocketbase.aehm.cloud");
-  const record = await pb
-    .collection("icons")
-    .getFirstListItem(`prefix="${icons[0].prefix}"`);
+//   const pb = new PocketBase("https://pocketbase.aehm.cloud");
+//   const record = await pb
+//     .collection("icons")
+//     .getFirstListItem(`prefix="${icons[0].prefix}"`);
 
-  if (record) return;
+//   if (record) return;
 
-  icons.forEach(icon => {
-    const data = {
-      "image": icon.image,
-      "path": icon.path,
-      "prefix": icon.prefix,
-      "name": icon.name,
-    };
+//   icons.forEach(icon => {
+//     const data = {
+//       "image": icon.image,
+//       "path": icon.path,
+//       "prefix": icon.prefix,
+//       "name": icon.name,
+//     };
 
-    pb.collection('icons').create(data);
-  });
-}
+//     pb.collection('icons').create(data);
+//   });
+// }
