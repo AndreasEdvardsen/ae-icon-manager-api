@@ -1,5 +1,5 @@
 const { MongoClient, ServerApiVersion } = require("mongodb");
-import PocketBase from "pocketbase";
+const PocketBase = require("pocketbase");
 const express = require("express");
 const cors = require("cors");
 const app = express();
