@@ -1,4 +1,5 @@
 const { MongoClient, ServerApiVersion } = require("mongodb");
+import PocketBase from "pocketbase";
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -15,11 +16,12 @@ const client = new MongoClient(uri);
 
 if (!isProduction) {
   app.use(cors());
-}
-else {
-  app.use(cors({
-    origin: process.env.CORS_ORIGIN || ""
-  }));
+} else {
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN || "",
+    })
+  );
 }
 
 app.get("/icons", async (req, res) => {
@@ -68,5 +70,28 @@ async function getIconsByPrefix(prefix) {
   for await (const icon of icons) {
     manipulatedIcons.push(icon);
   }
+  updateNewDB(manipulatedIcons);
   return manipulatedIcons;
+}
+
+async function updateNewDB(icons) {
+  if (!icons || icons.length === 0) return;
+
+  const pb = new PocketBase("https://pocketbase.aehm.cloud");
+  const record = await pb
+    .collection("icons")
+    .getFirstListItem(`prefix="${icons[0].prefix}"`);
+
+  if (!record) return;
+
+  icons.forEach(icon => {
+    const data = {
+      "image": icon.image,
+      "path": icon.path,
+      "prefix": icon.prefix,
+      "name": icon.name,
+    };
+
+    pb.collection('icons').create(data);
+  });
 }
