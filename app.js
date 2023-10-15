@@ -6,11 +6,12 @@ const app = express();
 const port = process.env.PORT || 4000;
 const uri = process.env.MONGODB_URI;
 const isProduction = process.env.NODE_ENV === "production";
-const client = new MongoClient(uri);
 
 if (!process.env.MONGODB_URI) {
   return console.error("MONGODB_URI environment variable is required");
 }
+
+const client = new MongoClient(uri);
 
 if (!isProduction) {
   app.use(cors());
