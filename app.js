@@ -82,7 +82,7 @@ async function updateNewDB(icons) {
     .collection("icons")
     .getFirstListItem(`prefix="${icons[0].prefix}"`);
 
-  if (!record) return;
+  if (record) return;
 
   icons.forEach(icon => {
     const data = {
