@@ -7,4 +7,4 @@ COPY app.js ./
 RUN bun install
 
 EXPOSE 8080
-CMD ["bun", "run"]
+CMD ["bun", "run", "app.js"]
