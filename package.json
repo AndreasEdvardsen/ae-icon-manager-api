@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "bun app.ss"
   },
   "repository": {
     "type": "git",
@@ -17,10 +17,10 @@
   },
   "homepage": "https://github.com/AndreasEdvardsen/ae-icon-manager-api#readme",
   "dependencies": {
+    "bun": "^1.0.11",
     "cors": "^2.8.5",
-    "express": "^4.18.2",
     "mongodb": "^6.1.0",
     "nodemon": "^3.0.1",
-    "pocketbase": "^0.18.3"
+    "pocketbase": "^0.19.0"
   }
 }

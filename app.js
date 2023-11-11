@@ -1,68 +1,60 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
-const PocketBase = require('pocketbase/cjs')
-const express = require("express");
-const cors = require("cors");
-const app = express();
+import { MongoClient } from "mongodb";
 
 const port = process.env.PORT || 4000;
 const uri = process.env.MONGODB_URI;
 const isProduction = process.env.NODE_ENV === "production";
 
-if (!process.env.MONGODB_URI) {
-  return console.error("MONGODB_URI environment variable is required");
-}
-
 const client = new MongoClient(uri);
 
-if (!isProduction) {
-  app.use(cors());
-} else {
-  app.use(
-    cors({
-      origin: process.env.CORS_ORIGIN || "",
-    })
-  );
-}
+const CORS_HEADERS = {
+  headers: {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "OPTIONS, POST",
+    "Access-Control-Allow-Headers": "Content-Type",
+  },
+};
 
-app.get("/icons", async (req, res) => {
-  const prefix = req.query.prefix;
-  if (!prefix) {
-    return res.status(400).send("Missing prefix query parameter");
-  }
+const iconsCache = {
+  mdi: [],
+  fa: [],
+  linea_basic: [],
+};
 
-  try {
-    const icons = await getIconsByPrefix(prefix);
-    res.send(icons);
-  } catch (err) {
-    res.status(500).send(err);
-  }
+const server = Bun.serve({
+  port,
+  async fetch(req) {
+    const { searchParams, pathname } = new URL(req.url);
+    if (
+      req.method === "GET" &&
+      pathname === "/icons" &&
+      searchParams.get("prefix")
+    ) {
+      const icons = await getIconsByPrefix(
+        searchParams.get("prefix"),
+        iconsCache
+      );
+      return new Response(JSON.stringify(icons), CORS_HEADERS);
+    } else if (req.method == "GET" && pathname == "/distinctIconPrefixes") {
+      const prefixes = await getDistinctIconPrefixes();
+      return new Response(JSON.stringify(prefixes), CORS_HEADERS);
+    }
+
+    return new Response("Method not handled");
+  },
 });
 
-app.get("/distinctIconPrefixes", async (req, res) => {
-  try {
-    const prefixes = await getDistinctIconPrefixes();
-    res.send(prefixes);
-  } catch (err) {
-    res.status(500).send(err);
-  }
-});
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something went wrong!");
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-  console.log(`MONGODB_URI: ${uri}`);
-});
+console.log(`Listening on localhost:${server.port}`);
 
 async function getDistinctIconPrefixes() {
   const iconsCollection = client.db("AEIconManager").collection("Icons");
   return await iconsCollection.distinct("prefix");
 }
 
-async function getIconsByPrefix(prefix) {
+async function getIconsByPrefix(prefix, iconsCache) {
+  if (!prefix) return [];
+  if (iconsCache && iconsCache[prefix].length > 0) return iconsCache[prefix];
+  console.log("icons in cache", icons);
+
   const iconsCollection = client.db("AEIconManager").collection("Icons");
   var icons = iconsCollection.find({ prefix: prefix });
 
@@ -70,7 +62,7 @@ async function getIconsByPrefix(prefix) {
   for await (const icon of icons) {
     manipulatedIcons.push(icon);
   }
-  //updateNewDB(manipulatedIcons);
+  iconsCache[prefix] = manipulatedIcons;
   return manipulatedIcons;
 }
 
