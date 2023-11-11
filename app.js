@@ -52,8 +52,8 @@ async function getDistinctIconPrefixes() {
 
 async function getIconsByPrefix(prefix, iconsCache) {
   if (!prefix) return [];
-  if (iconsCache && iconsCache[prefix].length > 0) return iconsCache[prefix];
-  console.log("icons in cache", icons);
+  if (iconsCache && iconsCache[prefix] && iconsCache[prefix].length > 0)
+    return iconsCache[prefix];
 
   const iconsCollection = client.db("AEIconManager").collection("Icons");
   var icons = iconsCollection.find({ prefix: prefix });
